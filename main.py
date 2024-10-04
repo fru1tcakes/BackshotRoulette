@@ -1,15 +1,66 @@
 import pyxel
 import time
+from tkinter import *
 import dealer
 import toolbar
+import sys
 import round
+from achievements import AchievementSystem
 from round import Round
 from dealer import Dealer
 import random
+from playsound import playsound
+import threading
+import atexit
+import logging
+logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
+                    level=logging.DEBUG)
+
+
+def play_sound():
+    # List of songs
+    songs = ['osama.mp3', 'wenotlikeyou.mp3', 'withdrawals.mp3']
+    # Randomize the order of the songs
+    random.shuffle(songs)
+
+    # Play each song in the shuffled list
+    for song in songs:
+        playsound(song)
+        # Wait for the song to finish before playing the next one
+        # Assuming each song is about 3 minutes long
+        time.sleep(180)
+
+
+
+sound_thread = threading.Thread(target=play_sound)
+sound_thread.start()
+
+splash = Tk()
+splash.overrideredirect(True)  # remove title bar
+splash.title("Welcome")  # assigning title for splash screen
+splash.geometry("1920x1440")  # set geometry for splash screen
+splash.after(4000, splash.destroy)  # splash screen will destroy after 4 sec
+bg = PhotoImage(file="freaky.png")  # insert file name to be display
+lab = Label(splash, image=bg)  # create label
+lab.pack()  # pack the label
+
+splash.mainloop()
+
+splash2 = Tk()
+splash2.overrideredirect(True)  # remove title bar
+splash2.title("Welcome")  # assigning title for splash screen
+splash2.geometry("300x168+800+500")  # set geometry for splash screen
+splash2.after(4000, splash2.destroy)  # splash screen will destroy after 4 sec
+bg2 = PhotoImage(file="ya.png")  # insert file name to be display
+lab2 = Label(splash2, image=bg2)  # create label
+lab2.pack()  # pack the label
+
+splash2.mainloop()
 
 dealer_state = 'holdinggun'
 
 
+#----------------------------------------------------------------------------------------------
 class App:
     def __init__(self):
         pyxel.init(300, 300)
@@ -17,107 +68,137 @@ class App:
         self.rounds = Round()
         self.toolbar = toolbar.Toolbar(self, self.rounds)
         self.rounds.load_shells()
-        self.player_lives = 3
-        self.bang_time = 0  #
+        self.round_number = 1
+        self.player_lives = self.round_number * 2
         self.dealer = Dealer(self.player_lives, dealer_state='holdinggun')
+        self.bang_time = 0
         self.click_time = 0
         self.console_messages = []
         self.player_turn = True
         self.dealer_turn_start_time = None
+        self.achievement_system = AchievementSystem()
+        self.achievement_system.add_achievement('Beat the Dealer')
+        self.achievement_system.add_achievement('Played the game')
+        self.achievement_system.save_achievements()
+        # Load achievements from file
+        self.achievement_system.load_achievements()
+        self.achievement_system.earn_achievement('Played the game')
+        atexit.register(self.save_and_exit)
+
         pyxel.run(self.update, self.draw)
+
+    def save_and_exit(self):
+        # Save achievements to file
+        self.achievement_system.save_achievements()
+        logging.info('Achievements saved to file. (Save and Exit)')
+        # Exit the Python interpreter
+        pyxel.quit()
+        sys.exit()
 
     def add_to_console(self, message):
         # Add a new message to the console
         self.console_messages.append(message)
-        # Limit the console to the last 10 messages
         self.console_messages = self.console_messages[-7:]
         print(self.console_messages)
 
     def lose_player_life(self):
-        # Decrease the number of lives by one
         self.player_lives -= 1
         message = f"Player was shot! Remaining lives: {self.player_lives}"
         print(message)
         self.add_to_console(message)
 
-
     def update(self):
         # If the "BANG!" or "Click!" text is on the screen, return immediately
         if time.time() < self.bang_time + 2 or time.time() < self.click_time + 2:
-
             return
+        if pyxel.btnp(pyxel.KEY_P):
+            logging.info('Save and exit trigerred.')
+            self.save_and_exit()
+        if pyxel.btnp(pyxel.KEY_S):
+            logging.info('Manual Save trigerred.')
+            self.achievement_system.save_achievements()
 
-        if self.player_turn:  # Add this line
+        if self.player_lives <= 0 or self.dealer.dealer_lives <= 0:
+            self.round_number += 1
+            if self.round_number > 3:
+                print("Game Over")
+                self.achievement_system.earn_achievement('Beat the Dealer')
+                pyxel.quit()
+            else:
+                self.player_lives = self.round_number + 2
+                self.dealer.dealer_lives = self.round_number + 2
+                self.rounds.reset_shells()  # Reset the shells for the new round
+                self.player_turn = True
+                self.dealer_turn_start_time = None
+                print(f"Round {self.round_number} starts")
 
+        if self.player_turn:
             self.change_dealer_state('hit')
             if pyxel.btnp(pyxel.KEY_J):
                 print("Player decided to shoot himself.")
                 current_shell = self.rounds.next_round()
                 if current_shell == 1:  # If the shell is live
-                    self.lose_player_life()  # Player loses a life
-                    self.bang_time = time.time()  # Set bang_time to the current time
-                    self.player_turn = False  # Add this line
+                    self.lose_player_life()
+                    self.bang_time = time.time()
+                    self.player_turn = False
                 else:  # If the shell was unloaded
-                    self.click_time = time.time()  # Set click_time to the current time
+                    self.click_time = time.time()
             if pyxel.btnp(pyxel.KEY_L):
                 print("Player decided to shoot the dealer.")
                 current_shell = self.rounds.next_round()
                 if current_shell == 1:
-                    self.dealer.lose_life()  # Dealer loses a life
-                    self.bang_time = time.time()  # Set bang_time to the current time
-                else:  # If the shell was unloaded
+                    self.dealer.lose_life()
+                    self.bang_time = time.time()  #
+                    self.player_turn = False
+                else:
                     self.click_time = time.time()
-                    self.player_turn = False  # Add this line
-        else: #  Dealer's turn
+                    self.player_turn = False
+        else:
             if self.dealer_turn_start_time is None:
                 self.dealer_turn_start_time = time.time()
                 self.add_to_console("Dealer's turn.")
                 self.change_dealer_state('holdinggun')
 
             if time.time() - self.dealer_turn_start_time >= 3:
+                live_shells = self.rounds.shells.count(1)
+                total_shells = len(self.rounds.shells)
+                if total_shells > 0:
+                    live_shell_probability = live_shells / total_shells
+                else:
+                    live_shell_probability = 0  # or any default value
 
+                decision_value = live_shell_probability
+                print("Live shell probability:" + str(live_shell_probability))
+                print("decision_value" + str(decision_value))
 
-
-                next_shell = self.rounds.peek_next_shell()
-                if next_shell == 1:  # If the next shell is live
-                    if random.random() < 0.5:  # 50% chance
-                        print("Dealer decided to shoot himself.")
+                if decision_value < 0.5:  # If the decision value is low
+                    print("Dealer decided to shoot himself.")
+                    self.change_dealer_state('holdinggun')
+                    current_shell = self.rounds.next_round()
+                    if current_shell == 1:
+                        self.dealer.lose_life()
                         self.bang_time = time.time()
-                        current_shell = self.rounds.next_round()  # This will be a live shell
-                        self.dealer.lose_life()  # Dealer loses a life
-                        self.bang_time = time.time()  # Set bang_time to the current time
-                        self.change_dealer_state('hit')
                         self.player_turn = True
                         self.add_to_console('The dealer has shot himself.')
-                        self.add_to_console("Your turn.")
-                    else:  # 50% chance
-                        print("Dealer decided to shoot the player.")
-                        self.bang_time = time.time()
-                        current_shell = self.rounds.next_round()  # This will be a live shell
-                        self.lose_player_life()  # Player loses a life
-                        self.bang_time = time.time()  # Set bang_time to the current time
-                else:  # If the next shell is blank
-                    if random.random() < 0.7:  # 70% chance
-                        print("Dealer decided to shoot himself.")
-                        self.change_dealer_state('holdinggun')
+                    else:  # If the shell was unloaded
                         self.click_time = time.time()
-                        self.change_dealer_state('hit')
-                        current_shell = self.rounds.next_round()  # This will be a blank shell
-                        self.click_time = time.time()  # Set click_time to the current time
+                        self.player_turn = False
                         self.add_to_console('The dealer has shot himself. It was a Blank Shell.')
-                    else:  # 30% chance
-                        print("Dealer decided to shoot the player.")
-                        self.change_dealer_state('holdinggun')
+                else:  # If the decision value is high
+                    print("Dealer decided to shoot the player.")
+                    self.change_dealer_state('holdinggun')
+                    current_shell = self.rounds.next_round()
+                    if current_shell == 1:  # If the shell is live
+                        self.lose_player_life()
+                        self.bang_time = time.time()
+                        self.player_turn = True
+                    else:
                         self.click_time = time.time()
-                        current_shell = self.rounds.next_round()  # This will be a blank shell
-                        self.click_time = time.time()  # Set click_time to the current time
                         self.player_turn = True
                         self.add_to_console("Your turn.")
 
-                  # It's now the player's turn
                 self.dealer_turn_start_time = None
 
-                pass
     def draw(self):
         pyxel.cls(0)
         pyxel.blt(50, 80, 1, 0, 0, 248, 128)
@@ -128,10 +209,8 @@ class App:
         self.dealer.draw_dealer()
         self.toolbar.draw_toolbar()
 
-        # If the current time is less than bang_time plus 2 seconds, display the "BANG!" text
         if time.time() < self.bang_time + 2:
             pyxel.text(106, 118, "BANG!", pyxel.frame_count % 16)
-        # If the current time is less than click_time plus 2 seconds, display the "Click!" text
         if time.time() < self.click_time + 2:
             pyxel.text(106, 118, "Click!", pyxel.frame_count % 16)
 
@@ -142,7 +221,12 @@ class App:
         self.dealer.dealer_state = new_state
 
 
-# Run the app
-App()
+app = App()
+try:
+    pyxel.run(app.update, app.draw)
+except SystemExit:
+    app.save_and_exit()
+except Exception as e:
+    print(f"An error occurred: {e}")
 
 #pyxel.blt(0, 0, 1, 0, 0, 248, 128)

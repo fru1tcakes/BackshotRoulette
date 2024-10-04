@@ -19,29 +19,25 @@ class Toolbar:
 
     def draw_shells(self):
         live_shell_count = 0
-        pyxel.text(130, 25, "LIVE", 6)
-        pyxel.text(130, 55, "BLANK", 4)
+        pyxel.text(160, 25, "LIVE", 6)
+        pyxel.text(160, 55, "BLANK", 4)
         blank_shell_count = 0
         for i, shell in enumerate(self.rounds.shells):
             if shell == 1:  # If the shell is live
                 # Draw a live shell sprite
-                pyxel.blt(150 + live_shell_count * 18, 15, 0, 32, 0, 24, 24)
+                pyxel.blt(180 + live_shell_count * 18, 15, 0, 32, 0, 24, 24)
                 live_shell_count += 1
             else:  # If the shell is blank
                 # Draw a blank shell sprite
-                pyxel.blt(150 + blank_shell_count * 18, 45, 0, 72, 0, 24, 24)
+                pyxel.blt(180 + blank_shell_count * 18, 45, 0, 72, 0, 24, 24)
                 blank_shell_count += 1
 
     def draw_lives(self):
         pyxel.text(15, 25, "HEALTH", 7)
         pyxel.text(15, 50, "DEALER", 7)
         for i in range(self.app.player_lives):
-            # Draw an image sprite for each life the player has
-            # Replace the parameters of pyxel.blt with the correct ones for your image sprite
-            # The position of each image is offset by i * 16 to avoid overlap
             pyxel.blt(40 + i * 28, 15, 0, 0, 0, 28, 28)
-        for i in range(self.app.dealer.dealer_lives):  # Add this loop to draw the dealer lives
-            # Draw an image sprite for each life the dealer has
+        for i in range(self.app.dealer.dealer_lives):
             pyxel.blt(40 + i * 28, 43, 0, 136, 0, 23, 20)
 
     def draw_power_ups(self):

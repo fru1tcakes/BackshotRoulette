@@ -9,7 +9,6 @@ class Dealer:
         self.hit_time = 0
 
     def lose_life(self):
-        # Decrease the number of dealer lives by one
         self.dealer_lives -= 1
         self.hit_time = time.time()
         print(f"Dealer was shot! Remaining lives: {self.dealer_lives}")
