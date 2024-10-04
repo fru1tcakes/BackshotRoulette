@@ -1,6 +1,7 @@
 from tkinter import *
 import pickle
 import logging
+import plyer
 from plyer import notification
 
 class Achievement:
