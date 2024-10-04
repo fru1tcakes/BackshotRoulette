@@ -1,6 +1,9 @@
 from tkinter import Tk, Label, Button, PhotoImage, Canvas
 from achievements import AchievementSystem
 import subprocess
+import plyer
+import sys
+import os
 
 class MainMenu:
     def __init__(self, master):
@@ -31,7 +34,11 @@ class MainMenu:
 
     def start_game(self):
         print("Starting game...")
-        subprocess.run(["python", "main.py"])
+        env = os.environ.copy()  # Copy the current environment variables
+        env["NEW_ENV_VAR"] = "value"  # Add a new environment variable or modify an existing one
+        self.master.withdraw()  # Hide the main window
+        subprocess.run([sys.executable, "main.py"], env=env, check=True)
+        self.master.deiconify()  # Show the main window again
 
     def view_achievements(self):
         print("Viewing achievements...")

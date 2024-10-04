@@ -24,6 +24,7 @@ from playsound import playsound
 import threading
 import atexit
 import logging
+print(sys.path)
 #######################################  LOGGING   ##############################################################
 
 logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
