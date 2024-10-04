@@ -1,3 +1,4 @@
+#######################################  IMPORTS   ##############################################################
 import pyxel
 import time
 from tkinter import *
@@ -13,54 +14,52 @@ from playsound import playsound
 import threading
 import atexit
 import logging
+#######################################  LOGGING   ##############################################################
+
 logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
 
 
+#######################################  SOUNDTRACK   ##############################################################
 def play_sound():
     # List of songs
     songs = ['osama.mp3', 'wenotlikeyou.mp3', 'withdrawals.mp3']
-    # Randomize the order of the songs
     random.shuffle(songs)
 
-    # Play each song in the shuffled list
     for song in songs:
         playsound(song)
-        # Wait for the song to finish before playing the next one
-        # Assuming each song is about 3 minutes long
         time.sleep(180)
-
-
 
 sound_thread = threading.Thread(target=play_sound)
 sound_thread.start()
 
+#######################################  SPLASH SCREENS   ##############################################################
 splash = Tk()
-splash.overrideredirect(True)  # remove title bar
-splash.title("Welcome")  # assigning title for splash screen
-splash.geometry("1920x1440")  # set geometry for splash screen
-splash.after(4000, splash.destroy)  # splash screen will destroy after 4 sec
-bg = PhotoImage(file="freaky.png")  # insert file name to be display
-lab = Label(splash, image=bg)  # create label
-lab.pack()  # pack the label
+splash.overrideredirect(True)
+splash.title("Welcome")
+splash.geometry("1920x1440")
+splash.after(4000, splash.destroy)
+bg = PhotoImage(file="freaky.png")
+lab = Label(splash, image=bg)
+lab.pack()
 
 splash.mainloop()
 
 splash2 = Tk()
-splash2.overrideredirect(True)  # remove title bar
-splash2.title("Welcome")  # assigning title for splash screen
-splash2.geometry("300x168+800+500")  # set geometry for splash screen
-splash2.after(4000, splash2.destroy)  # splash screen will destroy after 4 sec
-bg2 = PhotoImage(file="ya.png")  # insert file name to be display
-lab2 = Label(splash2, image=bg2)  # create label
-lab2.pack()  # pack the label
+splash2.overrideredirect(True)
+splash2.title("Welcome")
+splash2.geometry("300x168+800+500")
+splash2.after(4000, splash2.destroy)
+bg2 = PhotoImage(file="ya.png")
+lab2 = Label(splash2, image=bg2)
+lab2.pack()
 
 splash2.mainloop()
 
 dealer_state = 'holdinggun'
 
 
-#----------------------------------------------------------------------------------------------
+#######################################  MAIN GAME   ##############################################################
 class App:
     def __init__(self):
         pyxel.init(300, 300)
@@ -108,7 +107,6 @@ class App:
         self.add_to_console(message)
 
     def update(self):
-        # If the "BANG!" or "Click!" text is on the screen, return immediately
         if time.time() < self.bang_time + 2 or time.time() < self.click_time + 2:
             return
         if pyxel.btnp(pyxel.KEY_P):
@@ -165,13 +163,13 @@ class App:
                 if total_shells > 0:
                     live_shell_probability = live_shells / total_shells
                 else:
-                    live_shell_probability = 0  # or any default value
+                    live_shell_probability = 0
 
                 decision_value = live_shell_probability
                 print("Live shell probability:" + str(live_shell_probability))
                 print("decision_value" + str(decision_value))
 
-                if decision_value < 0.5:  # If the decision value is low
+                if decision_value < 0.5:  # If the confidence value is low
                     print("Dealer decided to shoot himself.")
                     self.change_dealer_state('holdinggun')
                     current_shell = self.rounds.next_round()
@@ -220,6 +218,7 @@ class App:
     def change_dealer_state(self, new_state):
         self.dealer.dealer_state = new_state
 
+#######################################  RUN APP & EXCEPTION HANDLING   ##############################################################
 
 app = App()
 try:
@@ -229,4 +228,3 @@ except SystemExit:
 except Exception as e:
     print(f"An error occurred: {e}")
 
-#pyxel.blt(0, 0, 1, 0, 0, 248, 128)

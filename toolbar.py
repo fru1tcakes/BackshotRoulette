@@ -24,11 +24,11 @@ class Toolbar:
         blank_shell_count = 0
         for i, shell in enumerate(self.rounds.shells):
             if shell == 1:  # If the shell is live
-                # Draw a live shell sprite
+                # Draw a live shell
                 pyxel.blt(180 + live_shell_count * 18, 15, 0, 32, 0, 24, 24)
                 live_shell_count += 1
             else:  # If the shell is blank
-                # Draw a blank shell sprite
+                # Draw a blank shell
                 pyxel.blt(180 + blank_shell_count * 18, 45, 0, 72, 0, 24, 24)
                 blank_shell_count += 1
 

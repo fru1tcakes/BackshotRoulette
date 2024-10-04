@@ -3,7 +3,7 @@ import time
 
 
 class Dealer:
-    def __init__(self, dealer_lives=3, dealer_state='normal'):  # Set the default number of dealer lives to 3
+    def __init__(self, dealer_lives=3, dealer_state='normal'):
         self.dealer_lives = dealer_lives
         self.dealer_state = dealer_state
         self.hit_time = 0

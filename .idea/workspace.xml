@@ -5,17 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2170a2e7-effc-4bb8-90de-c71fbdd30aed" name="Changes" comment="minor changes">
-      <change afterPath="$PROJECT_DIR$/.idea/developer-tools.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/achievements.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backshot.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/flex.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/flex.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/freaky.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/osama.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/splashscreen.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wenotlikeyou.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/withdrawals.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ya.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dealer.py" beforeDir="false" afterPath="$PROJECT_DIR$/dealer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
@@ -101,6 +90,7 @@
       <workItem from="1727938853906" duration="2869000" />
       <workItem from="1727942840937" duration="103000" />
       <workItem from="1727963583548" duration="315000" />
+      <workItem from="1728025597423" duration="635000" />
     </task>
     <task id="LOCAL-00001" summary="minor changes">
       <option name="closed" value="true" />
@@ -110,7 +100,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727788159808</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="minor changes">
+      <option name="closed" value="true" />
+      <created>1728025607872</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1728025607872</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
