@@ -25,6 +25,7 @@ import threading
 import atexit
 import logging
 print(sys.path)
+from powerups import PowerUp, Medkit, MagnifyingGlass, Handcuffs
 #######################################  LOGGING   ##############################################################
 
 logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
@@ -43,7 +44,7 @@ def play_sound():
 
 sound_thread = threading.Thread(target=play_sound)
 sound_thread.start()
-
+'''
 #######################################  SPLASH SCREENS   ##############################################################
 splash = Tk()
 splash.overrideredirect(True)
@@ -68,7 +69,7 @@ lab2.pack()
 splash2.mainloop()
 
 dealer_state = 'holdinggun'
-
+'''
 
 #######################################  MAIN GAME   ##############################################################
 class App:
@@ -82,10 +83,13 @@ class App:
         self.player_lives = self.round_number * 2
         self.dealer = Dealer(self.player_lives, dealer_state='holdinggun')
         self.bang_time = 0
+        self.skip_next_turn = False
         self.click_time = 0
         self.console_messages = []
         self.player_turn = True
         self.dealer_turn_start_time = None
+        self.power_ups = []
+        self.give_power_ups()
         self.achievement_system = AchievementSystem()
         self.achievement_system.add_achievement('Beat the Dealer')
         self.achievement_system.add_achievement('Played the game')
@@ -96,6 +100,17 @@ class App:
         atexit.register(self.save_and_exit)
 
         pyxel.run(self.update, self.draw)
+
+    def give_power_ups(self):
+        num_power_ups = random.randint(1, 3)
+        for _ in range(num_power_ups):
+            power_up_type = random.choice([Medkit, MagnifyingGlass, Handcuffs])
+            self.power_ups.append(power_up_type())
+
+    def use_power_up(self, power_up_index):
+        power_up = self.power_ups[power_up_index]
+        if power_up.use(self):
+            del self.power_ups[power_up_index]
 
     def save_and_exit(self):
         # Save achievements to file
@@ -163,10 +178,14 @@ class App:
                     self.click_time = time.time()
                     self.player_turn = False
         else:
-            if self.dealer_turn_start_time is None:
-                self.dealer_turn_start_time = time.time()
-                self.add_to_console("Dealer's turn.")
-                self.change_dealer_state('holdinggun')
+            if self.skip_next_turn:
+                self.skip_next_turn = False
+                self.player_turn = True
+            else:
+                if self.dealer_turn_start_time is None:
+                    self.dealer_turn_start_time = time.time()
+                    self.add_to_console("Dealer's turn.")
+                    self.change_dealer_state('holdinggun')
 
             if time.time() - self.dealer_turn_start_time >= 3:
                 live_shells = self.rounds.shells.count(1)

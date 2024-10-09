@@ -41,6 +41,8 @@ class Toolbar:
             pyxel.blt(40 + i * 28, 43, 0, 136, 0, 23, 20)
 
     def draw_power_ups(self):
+        for i, power_up in enumerate(self.app.power_ups):
+            pyxel.text(15 + i * 100, 212, type(power_up).__name__, 7)
         return
         # Code to draw power-ups on the toolbar
 
