@@ -5,6 +5,8 @@ import plyer
 import sys
 import os
 
+######################################### LAUNCHER ##############################################################
+
 class MainMenu:
     def __init__(self, master):
         self.master = master
