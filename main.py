@@ -114,19 +114,15 @@ class App:
         if power_up.use(self):
             del self.power_ups[power_up_index]
 
+
+#Disclaimer: la prochaine fonction j'ai reussi grace a stackexchange
     def check_button_press(self):
-        print (self.power_up_used_this_turn)
-        if not self.power_up_used_this_turn:
             if pyxel.btnp(pyxel.KEY_1) and any(isinstance(x, Medkit) for x in self.power_ups):
                 self.use_power_up(next(i for i, x in enumerate(self.power_ups) if isinstance(x, Medkit)))
-                self.power_up_used_this_turn = True
             elif pyxel.btnp(pyxel.KEY_2) and any(isinstance(x, MagnifyingGlass) for x in self.power_ups):
                 self.use_power_up(next(i for i, x in enumerate(self.power_ups) if isinstance(x, MagnifyingGlass)))
-                self.power_up_used_this_turn = True
             elif pyxel.btnp(pyxel.KEY_3) and any(isinstance(x, Handcuffs) for x in self.power_ups):
-                if self.dealer_turn_start_time is not None:
-                    self.use_power_up(next(i for i, x in enumerate(self.power_ups) if isinstance(x, Handcuffs)))
-                    self.power_up_used_this_turn = True
+                self.use_power_up(next(i for i, x in enumerate(self.power_ups) if isinstance(x, Handcuffs)))
 
     def save_and_exit(self):
         # Save achievements to file
