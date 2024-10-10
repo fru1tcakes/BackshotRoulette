@@ -11,3 +11,4 @@ L - Shoot Dealer
 1 - Medkit ( Heal 1 health)
 2 - Magnifying Glass ( See next Shell)
 3 - Handcuffs ( Skip Dealers Turn)
+Press P to save your achievements as you leave.
