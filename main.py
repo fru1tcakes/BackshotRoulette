@@ -90,6 +90,7 @@ class App:
         self.dealer_turn_start_time = None
         self.power_ups = []
         self.give_power_ups()
+        self.power_up_used_this_turn = False
         self.achievement_system = AchievementSystem()
         self.achievement_system.add_achievement('Beat the Dealer')
         self.achievement_system.add_achievement('Played the game')
@@ -98,6 +99,7 @@ class App:
         self.achievement_system.load_achievements()
         self.achievement_system.earn_achievement('Played the game')
         atexit.register(self.save_and_exit)
+
 
         pyxel.run(self.update, self.draw)
 
@@ -111,6 +113,7 @@ class App:
         power_up = self.power_ups[power_up_index]
         if power_up.use(self):
             del self.power_ups[power_up_index]
+
 
 #Disclaimer: la prochaine fonction j'ai reussi grace a stackexchange
     def check_button_press(self):
@@ -191,6 +194,7 @@ class App:
             if self.skip_next_turn:
                 self.skip_next_turn = False
                 self.player_turn = True
+                self.power_up_used_this_turn = False
             else:
                 if self.dealer_turn_start_time is None:
                     self.dealer_turn_start_time = time.time()

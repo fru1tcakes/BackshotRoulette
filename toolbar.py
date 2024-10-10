@@ -48,4 +48,3 @@ class Toolbar:
 
     def draw_buttons(self):
         return
-        # Code to draw buttons on the toolbar
