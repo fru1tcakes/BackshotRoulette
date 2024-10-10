@@ -112,6 +112,15 @@ class App:
         if power_up.use(self):
             del self.power_ups[power_up_index]
 
+#Disclaimer: la prochaine fonction j'ai reussi grace a stackexchange
+    def check_button_press(self):
+            if pyxel.btnp(pyxel.KEY_1) and any(isinstance(x, Medkit) for x in self.power_ups):
+                self.use_power_up(next(i for i, x in enumerate(self.power_ups) if isinstance(x, Medkit)))
+            elif pyxel.btnp(pyxel.KEY_2) and any(isinstance(x, MagnifyingGlass) for x in self.power_ups):
+                self.use_power_up(next(i for i, x in enumerate(self.power_ups) if isinstance(x, MagnifyingGlass)))
+            elif pyxel.btnp(pyxel.KEY_3) and any(isinstance(x, Handcuffs) for x in self.power_ups):
+                self.use_power_up(next(i for i, x in enumerate(self.power_ups) if isinstance(x, Handcuffs)))
+
     def save_and_exit(self):
         # Save achievements to file
         self.achievement_system.save_achievements()
@@ -157,6 +166,7 @@ class App:
                 print(f"Round {self.round_number} starts")
 
         if self.player_turn:
+            self.check_button_press()
             self.change_dealer_state('hit')
             if pyxel.btnp(pyxel.KEY_J):
                 print("Player decided to shoot himself.")
@@ -187,7 +197,7 @@ class App:
                     self.add_to_console("Dealer's turn.")
                     self.change_dealer_state('holdinggun')
 
-            if time.time() - self.dealer_turn_start_time >= 3:
+            if self.dealer_turn_start_time is not None and time.time() - self.dealer_turn_start_time >= 3:
                 live_shells = self.rounds.shells.count(1)
                 total_shells = len(self.rounds.shells)
                 if total_shells > 0:
