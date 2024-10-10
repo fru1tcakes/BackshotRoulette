@@ -1,3 +1,14 @@
+'''
+    ____     _       __                        __
+   / __/____(_)_  __/ /__________  ____ ______/ /_______
+  / /_/ ___/ / / / / __/ ___/ __ \/ __ `/ ___/ //_/ ___/
+ / __/ /  / / /_/ / /_(__  ) / / / /_/ / /__/ ,< (__  )
+/_/ /_/  /_/\__,_/\__/____/_/ /_/\__,_/\___/_/|_/____/
+
+'''
+
+
+#######################################  IMPORTS   ##############################################################
 import pyxel
 import time
 from tkinter import *
@@ -13,57 +24,57 @@ from playsound import playsound
 import threading
 import atexit
 import logging
+print(sys.path)
+from powerups import PowerUp, Medkit, MagnifyingGlass, Handcuffs
+#######################################  LOGGING   ##############################################################
+
 logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
 
 
+#######################################  SOUNDTRACK   ##############################################################
 def play_sound():
     # List of songs
     songs = ['osama.mp3', 'wenotlikeyou.mp3', 'withdrawals.mp3']
-    # Randomize the order of the songs
     random.shuffle(songs)
 
-    # Play each song in the shuffled list
     for song in songs:
         playsound(song)
-        # Wait for the song to finish before playing the next one
-        # Assuming each song is about 3 minutes long
         time.sleep(180)
-
-
 
 sound_thread = threading.Thread(target=play_sound)
 sound_thread.start()
-
+'''
+#######################################  SPLASH SCREENS   ##############################################################
 splash = Tk()
-splash.overrideredirect(True)  # remove title bar
-splash.title("Welcome")  # assigning title for splash screen
-splash.geometry("1920x1440")  # set geometry for splash screen
-splash.after(4000, splash.destroy)  # splash screen will destroy after 4 sec
-bg = PhotoImage(file="freaky.png")  # insert file name to be display
-lab = Label(splash, image=bg)  # create label
-lab.pack()  # pack the label
+splash.overrideredirect(True)
+splash.title("Welcome")
+splash.geometry("1920x1440")
+splash.after(4000, splash.destroy)
+bg = PhotoImage(file="freaky.png")
+lab = Label(splash, image=bg)
+lab.pack()
 
 splash.mainloop()
 
 splash2 = Tk()
-splash2.overrideredirect(True)  # remove title bar
-splash2.title("Welcome")  # assigning title for splash screen
-splash2.geometry("300x168+800+500")  # set geometry for splash screen
-splash2.after(4000, splash2.destroy)  # splash screen will destroy after 4 sec
-bg2 = PhotoImage(file="ya.png")  # insert file name to be display
-lab2 = Label(splash2, image=bg2)  # create label
-lab2.pack()  # pack the label
+splash2.overrideredirect(True)
+splash2.title("Welcome")
+splash2.geometry("300x168+800+500")
+splash2.after(4000, splash2.destroy)
+bg2 = PhotoImage(file="ya.png")
+lab2 = Label(splash2, image=bg2)
+lab2.pack()
 
 splash2.mainloop()
 
 dealer_state = 'holdinggun'
+'''
 
-
-#----------------------------------------------------------------------------------------------
+#######################################  MAIN GAME   ##############################################################
 class App:
     def __init__(self):
-        pyxel.init(300, 300)
+        pyxel.init(300, 300, title="Buckshot Roulette")
         pyxel.load("test.pyxres")
         self.rounds = Round()
         self.toolbar = toolbar.Toolbar(self, self.rounds)
@@ -72,10 +83,14 @@ class App:
         self.player_lives = self.round_number * 2
         self.dealer = Dealer(self.player_lives, dealer_state='holdinggun')
         self.bang_time = 0
+        self.skip_next_turn = False
         self.click_time = 0
         self.console_messages = []
         self.player_turn = True
         self.dealer_turn_start_time = None
+        self.power_ups = []
+        self.give_power_ups()
+        self.power_up_used_this_turn = False
         self.achievement_system = AchievementSystem()
         self.achievement_system.add_achievement('Beat the Dealer')
         self.achievement_system.add_achievement('Played the game')
@@ -85,7 +100,29 @@ class App:
         self.achievement_system.earn_achievement('Played the game')
         atexit.register(self.save_and_exit)
 
+
         pyxel.run(self.update, self.draw)
+
+    def give_power_ups(self):
+        num_power_ups = random.randint(1, 3)
+        for _ in range(num_power_ups):
+            power_up_type = random.choice([Medkit, MagnifyingGlass, Handcuffs])
+            self.power_ups.append(power_up_type())
+
+    def use_power_up(self, power_up_index):
+        power_up = self.power_ups[power_up_index]
+        if power_up.use(self):
+            del self.power_ups[power_up_index]
+
+
+#Disclaimer: la prochaine fonction j'ai reussi grace a stackexchange
+    def check_button_press(self):
+            if pyxel.btnp(pyxel.KEY_1) and any(isinstance(x, Medkit) for x in self.power_ups):
+                self.use_power_up(next(i for i, x in enumerate(self.power_ups) if isinstance(x, Medkit)))
+            elif pyxel.btnp(pyxel.KEY_2) and any(isinstance(x, MagnifyingGlass) for x in self.power_ups):
+                self.use_power_up(next(i for i, x in enumerate(self.power_ups) if isinstance(x, MagnifyingGlass)))
+            elif pyxel.btnp(pyxel.KEY_3) and any(isinstance(x, Handcuffs) for x in self.power_ups):
+                self.use_power_up(next(i for i, x in enumerate(self.power_ups) if isinstance(x, Handcuffs)))
 
     def save_and_exit(self):
         # Save achievements to file
@@ -108,7 +145,6 @@ class App:
         self.add_to_console(message)
 
     def update(self):
-        # If the "BANG!" or "Click!" text is on the screen, return immediately
         if time.time() < self.bang_time + 2 or time.time() < self.click_time + 2:
             return
         if pyxel.btnp(pyxel.KEY_P):
@@ -133,6 +169,7 @@ class App:
                 print(f"Round {self.round_number} starts")
 
         if self.player_turn:
+            self.check_button_press()
             self.change_dealer_state('hit')
             if pyxel.btnp(pyxel.KEY_J):
                 print("Player decided to shoot himself.")
@@ -154,24 +191,29 @@ class App:
                     self.click_time = time.time()
                     self.player_turn = False
         else:
-            if self.dealer_turn_start_time is None:
-                self.dealer_turn_start_time = time.time()
-                self.add_to_console("Dealer's turn.")
-                self.change_dealer_state('holdinggun')
+            if self.skip_next_turn:
+                self.skip_next_turn = False
+                self.player_turn = True
+                self.power_up_used_this_turn = False
+            else:
+                if self.dealer_turn_start_time is None:
+                    self.dealer_turn_start_time = time.time()
+                    self.add_to_console("Dealer's turn.")
+                    self.change_dealer_state('holdinggun')
 
-            if time.time() - self.dealer_turn_start_time >= 3:
+            if self.dealer_turn_start_time is not None and time.time() - self.dealer_turn_start_time >= 3:
                 live_shells = self.rounds.shells.count(1)
                 total_shells = len(self.rounds.shells)
                 if total_shells > 0:
                     live_shell_probability = live_shells / total_shells
                 else:
-                    live_shell_probability = 0  # or any default value
+                    live_shell_probability = 0
 
                 decision_value = live_shell_probability
                 print("Live shell probability:" + str(live_shell_probability))
                 print("decision_value" + str(decision_value))
 
-                if decision_value < 0.5:  # If the decision value is low
+                if decision_value < 0.5:  # If the confidence value is low
                     print("Dealer decided to shoot himself.")
                     self.change_dealer_state('holdinggun')
                     current_shell = self.rounds.next_round()
@@ -220,6 +262,7 @@ class App:
     def change_dealer_state(self, new_state):
         self.dealer.dealer_state = new_state
 
+#######################################  RUN APP & EXCEPTION HANDLING   ##############################################################
 
 app = App()
 try:
@@ -229,4 +272,3 @@ except SystemExit:
 except Exception as e:
     print(f"An error occurred: {e}")
 
-#pyxel.blt(0, 0, 1, 0, 0, 248, 128)

@@ -24,11 +24,11 @@ class Toolbar:
         blank_shell_count = 0
         for i, shell in enumerate(self.rounds.shells):
             if shell == 1:  # If the shell is live
-                # Draw a live shell sprite
+                # Draw a live shell
                 pyxel.blt(180 + live_shell_count * 18, 15, 0, 32, 0, 24, 24)
                 live_shell_count += 1
             else:  # If the shell is blank
-                # Draw a blank shell sprite
+                # Draw a blank shell
                 pyxel.blt(180 + blank_shell_count * 18, 45, 0, 72, 0, 24, 24)
                 blank_shell_count += 1
 
@@ -41,9 +41,10 @@ class Toolbar:
             pyxel.blt(40 + i * 28, 43, 0, 136, 0, 23, 20)
 
     def draw_power_ups(self):
+        for i, power_up in enumerate(self.app.power_ups):
+            pyxel.text(15 + i * 100, 212, type(power_up).__name__, 7)
         return
         # Code to draw power-ups on the toolbar
 
     def draw_buttons(self):
         return
-        # Code to draw buttons on the toolbar
